@@ -2,7 +2,7 @@
 project: "SkitourSafe"
 context_type: greenfield
 created: 2026-10-19
-updated: 2026-10-19
+updated: 2026-10-24
 checkpoint:
   current_phase: 8
   phases_completed: [1, 2, 3, 4, 5, 6, 7]
@@ -160,9 +160,14 @@ Closed during the check: the deadline discrepancy from phase 6 — by user decis
 
 ## Forward: tech-stack (notes for the next chain step — NOT part of the PRD)
 
-- Language and framework: TypeScript, Next.js (App Router) as a full-stack solution.
+> Locked at the tech-stack-selection step on 2026-10-24. The authoritative
+> record is `context/foundation/tech-stack.md` (starter `10x-astro-starter`,
+> `path_taken: standard`). The bullets below are kept in sync with it.
+
+- Language and framework: TypeScript, Astro 7 (meta-framework + API routes) with React 19 interactive islands — the `10x-astro-starter` opinionated full-stack starter. Next.js was considered and dropped; the starter ships auth and the database wired, which the 3-week after-hours window needs.
 - Database, backend, authorization: Supabase (PostgreSQL + Supabase Auth). Avoid Firebase and AWS Amplify.
-- AI layer: OpenRouter (flexible model switching without code changes).
+- Deployment: Cloudflare Pages (starter default); CI/CD via GitHub Actions with auto-deploy on merge to main.
+- AI layer: OpenRouter (flexible model switching without code changes). Not carried by any starter in this cell — added as a custom API route, with the PRD's static fallback message covering model unavailability.
 - Styling: Tailwind CSS + simple ready-made components (e.g. shadcn/ui).
 - Avoid: Redux and complex global state, external weather APIs, a dedicated admin panel (routes as seed data in the database).
 - Declared work rhythm: "7-day sprint" — outdated against the closed deadline decision: `mvp_weeks: 3`, `hard_deadline: 2027-01-10` (see checkpoint).
