@@ -1,9 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "10x-astro-starter",
+  // Must match the Worker name in the Cloudflare dashboard. A mismatch fails the
+  // Workers Builds deploy (and triggers an autofix PR from Cloudflare).
+  "name": "skitoursafe",
+  // Adapter v14 entrypoint. Do NOT change to "./dist/_worker.js/index.js" — that is
+  // Pages-era guidance; Pages support was removed in @astrojs/cloudflare v13+.
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-05-08",
   "compatibility_flags": ["nodejs_compat"],
+  // Explicit (rather than left to defaults) so preview/version URLs are reachable
+  // and the deploy log stops warning that these are being defaulted.
+  "workers_dev": true,
+  "preview_urls": true,
+  // Upload source maps so `wrangler tail` stack traces point at real source.
+  "upload_source_maps": true,
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",

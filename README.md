@@ -52,6 +52,8 @@ npm run dev
 - `npm run dev` - Start development server (Cloudflare workerd runtime)
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
+- `npm run deploy` - Build and deploy to Cloudflare Workers (production)
+- `npm run preview:worker` - Build and upload a non-live Worker version
 - `npm run lint` - Run ESLint with type-checked rules
 - `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Run Prettier
@@ -151,21 +153,51 @@ Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_
 
 ## Deployment
 
-This project deploys to [Cloudflare Workers](https://workers.cloudflare.com/).
+This project deploys to [Cloudflare Workers](https://workers.cloudflare.com/) as a live SSR
+auth demo at **https://skitoursafe.skitoursafe.workers.dev**.
 
-1. Build the project:
+> **Node ≥ 22 is required by Wrangler 4.x.** If `npx wrangler` exits 1 with a Node-version
+> message, run `source "$HOME/.nvm/nvm.sh" && nvm use default` first — sourcing `nvm.sh` alone
+> does not switch an inherited `PATH`.
+
+### One-time setup
+
+Set the two Supabase values as Worker secrets. They are **write-only** — no tool can read them
+back, so confirm with `secret list` (names only):
 
 ```bash
-npm run build
+npx wrangler secret put SUPABASE_URL
+npx wrangler secret put SUPABASE_KEY   # anon/publishable key (sb_publishable_…), never sb_secret_…
+npx wrangler secret list               # expect both names
 ```
 
-2. Deploy with Wrangler:
+### Deploy
 
 ```bash
-npx wrangler deploy
+npm run deploy          # astro build && wrangler deploy  → production
+npm run preview:worker  # astro build && wrangler versions upload → non-live version
 ```
 
-Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or via `npx wrangler secret put`.
+`versions upload` publishes a version **without** serving it, so a `workers.dev` URL returns
+`404 error code: 1042` until something is promoted with `wrangler deploy`. That error means
+"no Worker is serving this hostname", not that the build is broken.
+
+### Secrets must be duplicated locally
+
+`.dev.vars` (local, gitignored) and the Worker secrets (production) are **separate stores** with
+no synchronisation. Change one without the other and local dev disagrees with production.
+Cloudflare loads **either** `.dev.vars` **or** `.env` — when `.dev.vars` exists, `.env` is
+ignored entirely, so do not create both.
+
+### Rollback
+
+```bash
+npx wrangler deployments list     # record the version ID before every deploy
+npx wrangler rollback <VERSION_ID>
+```
+
+`rollback` is **refused if bindings differ** between the two versions. Supabase schema and Auth
+settings do **not** roll back with the Worker — revert those deliberately.
 
 ## Smoke test
 
@@ -182,10 +214,12 @@ It needs a reachable Supabase instance (local or cloud) with email confirmation 
 
 ## CI
 
-GitHub Actions runs two jobs on every push and PR to `master`:
+GitHub Actions runs two jobs on every push and PR to `main`:
 
 - **ci** — lint, `astro check` and build. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets for the build step.
 - **smoke** — starts a local Supabase via the Supabase CLI, builds, serves the production preview on the Cloudflare runtime and runs `npm run smoke` against it. No secrets required.
+
+> **Note:** this Worker is also connected to **Cloudflare Workers Builds**, so a push to `main` deploys to production directly. The CI workflow above runs **in parallel with** that deploy and does not gate it — run `npm run lint` and `npx astro check` locally, or open a PR, before merging to `main`.
 
 ## License
 
