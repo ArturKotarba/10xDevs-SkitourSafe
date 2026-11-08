@@ -1,7 +1,7 @@
 ---
 change_id: domain-schema-and-rls
 title: Domain schema with RLS for profile, routes, and outings
-status: implementing
+status: implemented
 created: 2026-11-07
 updated: 2026-11-07
 archived_at: null

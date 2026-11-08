@@ -310,12 +310,12 @@ This is the **first** migration in the repository, so there is no existing data 
 
 #### Automated
 
-- [x] 3.1 `grep -c "No database tables or migrations are required" README.md` returns 0
-- [x] 3.2 `README.md` mentions `npm run types` and `supabase db push`
-- [x] 3.3 `AGENTS.md` no longer lists `supabase/migrations/` as absent
-- [x] 3.4 `npx prettier --check README.md AGENTS.md` passes
+- [x] 3.1 `grep -c "No database tables or migrations are required" README.md` returns 0 — 5c05ec3
+- [x] 3.2 `README.md` mentions `npm run types` and `supabase db push` — 5c05ec3
+- [x] 3.3 `AGENTS.md` no longer lists `supabase/migrations/` as absent — 5c05ec3
+- [x] 3.4 `npx prettier --check README.md AGENTS.md` passes — 5c05ec3
 
 #### Manual
 
-- [x] 3.5 README Supabase section reads consistently with no contradictory statements
-- [x] 3.6 Documented `link` and `db push` commands are copy-pasteable and reference the real project ref
+- [x] 3.5 README Supabase section reads consistently with no contradictory statements — 5c05ec3
+- [x] 3.6 Documented `link` and `db push` commands are copy-pasteable and reference the real project ref — 5c05ec3
