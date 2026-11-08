@@ -184,8 +184,10 @@ three weeks run out on runtime archaeology instead of on the route filter.
 - **Rollback**: `npx wrangler deployments list` to read version IDs, then
   `npx wrangler rollback [VERSION_ID]`. Takes seconds. Two caveats: only the ~100 most recent versions
   are addressable, and the command is **refused if bindings changed** between the versions involved.
-  Supabase schema changes do not roll back with the Worker — there are no migrations yet, but when
-  they arrive, a Worker rollback and a DB rollback are separate operations.
+  Supabase schema changes do not roll back with the Worker — a Worker rollback reverts only the
+  deployed code, while migrations under `supabase/migrations/` stay applied. `npx supabase db push` is
+  forward-only, so undoing a schema change means writing a new compensating migration. Treat a Worker
+  rollback and a DB rollback as two separate, ordered operations.
 - **Approval**: human-only actions are rotating the Supabase service key or database password,
   deleting the Worker, dropping Supabase tables, and any Cloudflare account-level change. An agent may
   run the build, `wrangler deploy`, `wrangler tail`, and read-only deployment listings unattended,

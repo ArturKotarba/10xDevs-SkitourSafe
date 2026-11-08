@@ -59,7 +59,7 @@ schema_paths = []
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
-# There are no migrations or seed files yet, so seeding is disabled. Add files under
+# There are no seed files yet, so seeding is disabled. Add files under
 # supabase/seeds/ and re-enable this before relying on reproducible local data.
 enabled = false
 # Specifies an ordered list of seed files to load during db reset.

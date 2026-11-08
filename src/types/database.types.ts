@@ -207,7 +207,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      aspect_octant: "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
+      aspect_octant: "none" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
       avalanche_level:
         | "low"
         | "moderate"
@@ -350,7 +350,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      aspect_octant: ["n", "ne", "e", "se", "s", "sw", "w", "nw"],
+      aspect_octant: ["none", "n", "ne", "e", "se", "s", "sw", "w", "nw"],
       avalanche_level: ["low", "moderate", "considerable", "high", "very_high"],
       experience_level: ["beginner", "intermediate", "advanced"],
       justification_source: ["ai", "fallback"],

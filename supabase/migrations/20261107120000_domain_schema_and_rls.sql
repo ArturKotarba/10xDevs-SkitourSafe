@@ -8,7 +8,9 @@ create type public.experience_level as enum ('beginner', 'intermediate', 'advanc
 create type public.wind_direction as enum ('none', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw');
 create type public.visibility as enum ('good', 'moderate', 'poor');
 create type public.route_difficulty as enum ('easy', 'moderate', 'hard');
-create type public.aspect_octant as enum ('n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw');
+-- 'none' covers routes with no meaningful single exposure (broad faces, valley traverses).
+-- Position matters: 'none' sorts first, so it never satisfies an octant comparison accidentally.
+create type public.aspect_octant as enum ('none', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw');
 create type public.outing_outcome as enum ('recommended', 'no_go');
 create type public.justification_source as enum ('ai', 'fallback');
 
@@ -129,6 +131,19 @@ create policy "outings_update_own" on public.outings
 create policy "outings_delete_own" on public.outings
   for delete to authenticated
   using ((select auth.uid()) = user_id);
+
+-- Supabase's `postgres` role carries a pg_default_acl entry
+-- ({postgres,anon,authenticated,service_role}=arwdDxtm) that is applied to every object
+-- created in `public`. GRANT cannot subtract a default, so the unwanted privileges must be
+-- revoked explicitly first. TRUNCATE is the dangerous one: it bypasses RLS entirely.
+revoke all on public.skier_profiles, public.routes, public.outings from anon;
+
+revoke truncate, references, trigger on public.skier_profiles, public.routes, public.outings
+from authenticated;
+
+-- routes is read-only for every user role; drop the default DML so the catalogue cannot be
+-- written even if a write policy is ever added by mistake. Seeding uses service_role.
+revoke insert, update, delete on public.routes from authenticated;
 
 -- Explicit grants so intent survives a local reset; nothing is granted to anon.
 grant select, insert, update, delete on public.skier_profiles to authenticated;

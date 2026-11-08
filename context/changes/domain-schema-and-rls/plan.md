@@ -56,6 +56,8 @@ Types are generated from the resulting local database rather than hand-written, 
 
 **`supabase gen types --local` needs a running stack.** It reads the schema from the local database, not from the migration file, so `supabase start` + `db reset` must precede type generation. Generating before the migration is applied produces types for the old (empty) schema.
 
+**`wind_direction` and `aspect_octant` are distinct enum types and are not assignable to each other.** They share eight octant literals but `wind_direction` also carries `'none'` for "no wind / calm", while `aspect_octant`'s `'none'` means "no meaningful exposure". That separation is deliberate — a route aspect and a wind direction are different concepts and must not be silently interchangeable. It does mean S-03's filter cannot compare them directly and must state explicitly how a wind direction maps onto the candidate aspect octants (and what `'none'` on either side matches).
+
 **RLS policies must use `(select auth.uid())`, not bare `auth.uid()`.** The subselect form lets Postgres evaluate the identity once per statement instead of once per row; on `routes` reads this is the difference between a stable filter and a per-row function call.
 
 ## Phase 1: Domain Schema Migration
@@ -74,7 +76,9 @@ Create `supabase/migrations/20261107120000_domain_schema_and_rls.sql` containing
 
 **Contract**: A single `.sql` file following `AGENTS.md`'s `YYYYMMDDHHmmss_short_description.sql` convention, containing in order:
 
-_Enum types (8)_ — `experience_level` `('beginner','intermediate','advanced')`; `avalanche_level` `('low','moderate','considerable','high','very_high')`; `wind_direction` `('none','n','ne','e','se','s','sw','w','nw')`; `visibility` `('good','moderate','poor')`; `route_difficulty` `('easy','moderate','hard')`; `aspect_octant` `('n','ne','e','se','s','sw','w','nw')`; `outing_outcome` `('recommended','no_go')`; `justification_source` `('ai','fallback')`.
+_Enum types (8)_ — `experience_level` `('beginner','intermediate','advanced')`; `avalanche_level` `('low','moderate','considerable','high','very_high')`; `wind_direction` `('none','n','ne','e','se','s','sw','w','nw')`; `visibility` `('good','moderate','poor')`; `route_difficulty` `('easy','moderate','hard')`; `aspect_octant` `('none','n','ne','e','se','s','sw','w','nw')`; `outing_outcome` `('recommended','no_go')`; `justification_source` `('ai','fallback')`.
+
+`aspect_octant` gained a leading `'none'` member during review (see `reviews/impl-review.md` F6): `routes.aspect` is `not null`, and a route with no meaningful single exposure (a broad face, a valley traverse) had no honest value to store. Adding the member now is cheap — `routes` is empty — whereas later it would be an `ALTER TYPE` against a seeded catalogue. `wind_direction` already had `'none'`.
 
 _`public.skier_profiles`_ — `user_id uuid primary key references auth.users(id) on delete cascade`; durable attributes `has_abc_gear boolean not null`, `terrain_familiarity experience_level not null`, `fitness_level experience_level not null`, `available_time_minutes integer not null check (available_time_minutes > 0)`; last-used conditions `avalanche_level` (nullable), `wind_direction` (nullable), `visibility` (nullable); `created_at`/`updated_at timestamptz not null default now()`. A `user_id` primary key is what makes "one profile per user" a database invariant.
 
@@ -93,6 +97,14 @@ _RLS_ — `alter table … enable row level security` on all three. Then, per `A
 | `outings`        | `authenticated`, `using ((select auth.uid()) = user_id)` | `authenticated`, `with check ((select auth.uid()) = user_id)` | same as insert | `using ((select auth.uid()) = user_id)` |
 
 _Grants_ — explicitly `grant select, insert, update, delete on public.skier_profiles and public.outings to authenticated`, `grant select on public.routes to authenticated`, and `grant all on the three tables to service_role`. Do not grant anything to `anon`. Do not rely on platform default privileges, so the intent survives a local reset.
+
+`GRANT` alone cannot subtract a default, so revokes are required **before** the grants (see `reviews/impl-review.md` F1). Supabase's `postgres` role carries a `pg_default_acl` entry (`{postgres,anon,authenticated,service_role}=arwdDxtm`) applied to every object created in `public`, which means `anon` and `authenticated` start with full DML plus `TRUNCATE`. `TRUNCATE` bypasses RLS entirely and would let a user with only an `anon` key wipe every user's journal, so the migration must:
+
+- `revoke all on` all three tables `from anon` — the intended state is zero privileges, so no re-grant follows.
+- `revoke truncate, references, trigger on` all three tables `from authenticated` — RLS never applies to these.
+- `revoke insert, update, delete on public.routes from authenticated` — the catalogue is read-only for user roles; seeding uses `service_role`.
+
+Verified target state, per `has_table_privilege` after a cold `db reset`: `anon` has none of `{SELECT,INSERT,UPDATE,DELETE,TRUNCATE}` on any table; `authenticated` has full DML on `skier_profiles` and `outings`, `SELECT` only on `routes`, and `TRUNCATE` nowhere.
 
 ```sql
 -- Enum declaration order defines comparison order. avalanche_level MUST stay ascending:
@@ -135,6 +147,8 @@ Add a repeatable type-generation script, commit the generated declaration file, 
 
 **Contract**: A new `"types": "supabase gen types typescript --local > src/types/database.types.ts"` entry in `scripts`, placed after `"smoke"`. No new dependency — `supabase` is already a devDependency (`package.json:57`) and the CLI is invoked through the local install.
 
+**Implemented**: the redirect is staged through a temp file (`> /tmp/skitoursafe-db.types.ts && mv …`) so a failed generation cannot truncate the committed file to 0 bytes.
+
 #### 2. Generated database types
 
 **File**: `src/types/database.types.ts` (new, generated)
@@ -158,6 +172,8 @@ Add a repeatable type-generation script, commit the generated declaration file, 
 **Intent**: Keep the generated declaration file out of hand-editing pressure by making it exempt from rules it was not written for, while leaving it type-checked.
 
 **Contract**: Add an ignore entry for `src/types/database.types.ts` only if `npm run lint` flags it. If the file already passes `strictTypeChecked` unchanged, make no edit — do not add a speculative exemption.
+
+**Implemented**: both exemptions were needed, each measured rather than assumed. `eslint src/types/database.types.ts --no-ignore` reports 9 `strictTypeChecked`/`stylisticTypeChecked` errors, and `prettier --check` fails on the generated output. `.prettierignore:2` was therefore added alongside `eslint.config.js:83`; both are load-bearing and `AGENTS.md:50` explains why they exist.
 
 ### Success Criteria:
 
@@ -284,7 +300,7 @@ This is the **first** migration in the repository, so there is no existing data 
 - [x] 1.3 Schema assertion query returns 3 tables and the expected enum types — e2fbab4
 - [x] 1.4 RLS assertion query returns `rowsecurity = true` for all three tables and policy counts of 4 / 1 / 4 — e2fbab4
 - [x] 1.5 Cross-user isolation check returns 0 foreign rows when reading as a second user — e2fbab4
-- [x] 1.6 `npm run smoke` still passes against the local stack — e2fbab4
+- [x] 1.6 `npm run smoke` still passes against the local stack — e2fbab4; re-verified 2026-11-08 after repointing `.dev.vars` at `http://127.0.0.1:54321` — 8/8 steps pass
 
 #### Manual
 
