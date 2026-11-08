@@ -114,7 +114,52 @@ npx supabase stop
 
 The local Studio UI is available at `http://localhost:54323`.
 
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
+### Database schema
+
+Domain tables live in `supabase/migrations/` and are applied by the CLI. The first
+migration creates three tables, all protected by row-level security:
+
+| Table            | Purpose                                                                  | Access                  |
+| ---------------- | ------------------------------------------------------------------------ | ----------------------- |
+| `skier_profiles` | Durable skier attributes (gear, terrain familiarity, fitness, time)      | Owner-scoped CRUD       |
+| `routes`         | Curated route catalogue (difficulty, ABC gear, duration, slope, aspect)  | Authenticated read-only |
+| `outings`        | Outing journal with snapshotted route attributes and recorded conditions | Owner-scoped CRUD       |
+
+To apply the migrations to a fresh local database:
+
+```bash
+npx supabase db reset
+```
+
+This is destructive — it drops and recreates the local database. Use
+`npx supabase db dump` first if you have local data worth keeping.
+
+TypeScript types are generated from the running schema, not hand-written:
+
+```bash
+npm run types
+```
+
+That rewrites `src/types/database.types.ts`, which the Supabase client in
+`src/lib/supabase.ts` is parameterized with, so `.from("outings")` returns typed
+rows with enum unions instead of `any`. The file must never be hand-edited —
+regenerate it whenever a migration changes the schema.
+
+Seed data is not configured yet, so `routes` is empty locally. Populating the
+catalogue is tracked separately (`curated-route-catalogue`).
+
+### Applying migrations to the hosted project
+
+The committed migration is the source of truth. This repository is **not**
+linked to the hosted Supabase project, and CI does not push migrations — applying
+them there is a deliberate manual act.
+
+The hosted project ref is `omrqppuyoadtjwbybnol`. To link and push:
+
+```bash
+npx supabase link --project-ref omrqppuyoadtjwbybnol
+npx supabase db push
+```
 
 ### Using a cloud Supabase project instead
 

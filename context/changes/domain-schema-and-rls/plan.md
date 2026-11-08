@@ -295,27 +295,27 @@ This is the **first** migration in the repository, so there is no existing data 
 
 #### Automated
 
-- [x] 2.1 `npm run types` regenerates the file without error while the local stack is running
-- [x] 2.2 `src/types/database.types.ts` exists and contains `skier_profiles`, `routes`, `outings` and the enum unions
-- [x] 2.3 `npm run lint` passes
-- [x] 2.4 `npx astro check` passes
-- [x] 2.5 `npm run build` succeeds
+- [x] 2.1 `npm run types` regenerates the file without error while the local stack is running — 02e9216
+- [x] 2.2 `src/types/database.types.ts` exists and contains `skier_profiles`, `routes`, `outings` and the enum unions — 02e9216
+- [x] 2.3 `npm run lint` passes — 02e9216
+- [x] 2.4 `npx astro check` passes — 02e9216
+- [x] 2.5 `npm run build` succeeds — 02e9216
 
 #### Manual
 
-- [x] 2.6 Hovering `createClient(...)` shows a `SupabaseClient<Database, …>` return type
-- [x] 2.7 A second `npm run types` produces an empty diff (no manual additions)
+- [x] 2.6 Hovering `createClient(...)` shows a `SupabaseClient<Database, …>` return type — 02e9216
+- [x] 2.7 A second `npm run types` produces an empty diff (no manual additions) — 02e9216
 
 ### Phase 3: Documentation Sync
 
 #### Automated
 
-- [ ] 3.1 `grep -c "No database tables or migrations are required" README.md` returns 0
-- [ ] 3.2 `README.md` mentions `npm run types` and `supabase db push`
-- [ ] 3.3 `AGENTS.md` no longer lists `supabase/migrations/` as absent
-- [ ] 3.4 `npx prettier --check README.md AGENTS.md` passes
+- [x] 3.1 `grep -c "No database tables or migrations are required" README.md` returns 0
+- [x] 3.2 `README.md` mentions `npm run types` and `supabase db push`
+- [x] 3.3 `AGENTS.md` no longer lists `supabase/migrations/` as absent
+- [x] 3.4 `npx prettier --check README.md AGENTS.md` passes
 
 #### Manual
 
-- [ ] 3.5 README Supabase section reads consistently with no contradictory statements
-- [ ] 3.6 Documented `link` and `db push` commands are copy-pasteable and reference the real project ref
+- [x] 3.5 README Supabase section reads consistently with no contradictory statements
+- [x] 3.6 Documented `link` and `db push` commands are copy-pasteable and reference the real project ref
