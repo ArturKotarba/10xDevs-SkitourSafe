@@ -3,7 +3,7 @@ project: SkitourSafe
 version: 1
 status: draft
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-08
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -41,7 +41,7 @@ Narciarz turystyczny z 1–3 sezonami doświadczenia planuje wyjście wieczorem 
 
 | ID   | Change ID                       | Outcome (user can …)                                                                                       | Prerequisites | PRD refs                                                                                 | Status   |
 | ---- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------- | -------- |
-| F-01 | `domain-schema-and-rls`         | (foundation) minimalny schemat domenowy z RLS: profil narciarza, katalog tras, wpisy dziennika            | —             | `## Access Control`, FR-004, FR-005, FR-008                                               | in-progress |
+| F-01 | `domain-schema-and-rls`         | (foundation) minimalny schemat domenowy z RLS: profil narciarza, katalog tras, wpisy dziennika            | —             | `## Access Control`, FR-004, FR-005, FR-008                                               | done |
 | F-02 | `curated-route-catalogue`       | (foundation) katalog popularnych tras zaseedowany i gotowy do filtrowania                                  | F-01          | FR-007, `## Business Logic`, `## Non-Goals` (bez automatycznej analizy GIS)               | proposed |
 | S-01 | `skier-profile-and-conditions`  | zapisać profil narciarza i bieżące warunki w trwałym profilu powiązanym z kontem                           | F-01          | US-01, FR-004, FR-005, FR-001, FR-002                                                     | proposed |
 | S-02 | `disclaimer-and-confirmation`   | zaakceptować zastrzeżenie odpowiedzialności i potwierdzić podsumowanie warunków przed analizą              | S-01          | US-01, FR-006, FR-010, NFR (wyświetlenie wyniku niemożliwe przed akceptacją zastrzeżenia) | proposed |
@@ -85,7 +85,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Czy katalog tras potrzebuje już w MVP wymiaru regionu lub obszaru, czy wystarczy płaska lista z atrybutami trasy? — Owner: user. Block: no.
 - **Risk:** Sekwencjonowane pierwsze, bo bez tabel żaden wycinek nie ma gdzie zapisać stanu; błędem byłoby jednak projektowanie pełnego modelu domenowego pod przyszłe funkcje — zakres ogranicza się do pól wymaganych przez FR-004, FR-005, FR-007 i FR-008.
-- **Status:** in-progress
+- **Status:** done
 
 ### F-02: Zaseedowany katalog popularnych tras
 
@@ -203,3 +203,5 @@ Empty on the very first milestone. Closure entries are appended here by the `REA
 ## Done
 
 Empty on first generation. `/10x-archive` appends an entry here — and flips that item's `Status` to `done` — when a change whose `Change ID` matches the item is archived. Do NOT pre-populate.
+
+- **F-01: (foundation) w bazie istnieją trzy tabele domenowe — profil narciarza, katalog tras i wpisy dziennika — z włączonym RLS i politykami ograniczającymi dostęp do danych właściciela.** — Archived 2026-11-08 → `context/archive/2026-11-07-domain-schema-and-rls/`. Lesson: —.
