@@ -279,32 +279,32 @@ This is the **first** migration in the repository, so there is no existing data 
 
 #### Automated
 
-- [x] 1.1 Migration file exists at `supabase/migrations/20261107120000_domain_schema_and_rls.sql` and matches the `AGENTS.md` naming convention
-- [x] 1.2 Local stack applies it cleanly: `npx supabase start && npx supabase db reset` exits 0 with no migration error
-- [x] 1.3 Schema assertion query returns 3 tables and the expected enum types
-- [x] 1.4 RLS assertion query returns `rowsecurity = true` for all three tables and policy counts of 4 / 1 / 4
-- [x] 1.5 Cross-user isolation check returns 0 foreign rows when reading as a second user
-- [x] 1.6 `npm run smoke` still passes against the local stack
+- [x] 1.1 Migration file exists at `supabase/migrations/20261107120000_domain_schema_and_rls.sql` and matches the `AGENTS.md` naming convention — e2fbab4
+- [x] 1.2 Local stack applies it cleanly: `npx supabase start && npx supabase db reset` exits 0 with no migration error — e2fbab4
+- [x] 1.3 Schema assertion query returns 3 tables and the expected enum types — e2fbab4
+- [x] 1.4 RLS assertion query returns `rowsecurity = true` for all three tables and policy counts of 4 / 1 / 4 — e2fbab4
+- [x] 1.5 Cross-user isolation check returns 0 foreign rows when reading as a second user — e2fbab4
+- [x] 1.6 `npm run smoke` still passes against the local stack — e2fbab4
 
 #### Manual
 
-- [ ] 1.7 Studio shows the three tables with expected columns and enum types for every closed-value field
-- [ ] 1.8 An authenticated `insert` into `public.routes` is denied by RLS
+- [x] 1.7 Studio shows the three tables with expected columns and enum types for every closed-value field — e2fbab4
+- [x] 1.8 An authenticated `insert` into `public.routes` is denied by RLS — e2fbab4
 
 ### Phase 2: Generated Types and Typed Client
 
 #### Automated
 
-- [ ] 2.1 `npm run types` regenerates the file without error while the local stack is running
-- [ ] 2.2 `src/types/database.types.ts` exists and contains `skier_profiles`, `routes`, `outings` and the enum unions
-- [ ] 2.3 `npm run lint` passes
-- [ ] 2.4 `npx astro check` passes
-- [ ] 2.5 `npm run build` succeeds
+- [x] 2.1 `npm run types` regenerates the file without error while the local stack is running
+- [x] 2.2 `src/types/database.types.ts` exists and contains `skier_profiles`, `routes`, `outings` and the enum unions
+- [x] 2.3 `npm run lint` passes
+- [x] 2.4 `npx astro check` passes
+- [x] 2.5 `npm run build` succeeds
 
 #### Manual
 
-- [ ] 2.6 Hovering `createClient(...)` shows a `SupabaseClient<Database, …>` return type
-- [ ] 2.7 A second `npm run types` produces an empty diff (no manual additions)
+- [x] 2.6 Hovering `createClient(...)` shows a `SupabaseClient<Database, …>` return type
+- [x] 2.7 A second `npm run types` produces an empty diff (no manual additions)
 
 ### Phase 3: Documentation Sync
 

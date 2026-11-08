@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "types": "mkdir -p src/types && supabase gen types typescript --local > src/types/database.types.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
